@@ -31,7 +31,7 @@
   --mw-xs: 599px;
 
   --ft-grd-blue: linear-gradient(45deg, rgba(var(--clr-blue), 1) 0%, rgba(var(--clr-grd-blue), 1) 60%);
-  --ft-grd-red: linear-gradient(45deg, rgba(var(--clr-red), 1) 0%, rgba(var(--clr-grd-red), 1) 60%);
+  --ft-grd-red: linear-gradient(45deg, rgba(var(--clr-red), 1) 0%, rgba(var(--clr-grd-red), 1) 100%);
 
 }
 
@@ -56,19 +56,28 @@ h1, h2, h3, p, ul, ol { margin-bottom: 0; }
 
 .fl-ft-h1 { font-size: clamp(50px, 15vw, 250px); }
 
-.btn-cmn{ display: inline-block; padding: 20px 80px 18px 30px; border-radius: 50px; box-shadow: inset 0px 0px 10px 0px rgba(0, 0, 0, 0.25); position: relative; transition: all 0.3s linear; background: #fff;  }
+.btn-cmn{ display: inline-block; padding: 20px 80px 18px 30px; border-radius: 50px; box-shadow: inset 0px 0px 8px 0px rgba(var(--clr-true-black), 0.25); position: relative; transition: all 0.3s linear; background: #fff;  }
 
-.btn-cmn::after{ content: ''; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); width: 50px; height: 50px; border-radius: 40px; background: url('../assets/goto.png') center no-repeat; background-size: 50% auto; box-shadow: 0px 0px 4x 1px rgba(var(--clr-light-grey), 0.25); transition: all 0.3s linear; }
+.btn-cmn::after{ content: ''; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); width: 50px; height: 50px; border-radius: 40px; }
 
-.btn-cmn:is(:hover, :focus)::after{ background: url('../assets/goto.png') center no-repeat, #e5e7eb;  background-size: 50% auto; transition: all 0.3s linear; }
+.btn-cmn:is(:hover, :focus)::after{ background: url('../assets/goto.png') center no-repeat, #e5e7eb;  background-size: 50% auto; transition: all 0.3s linear; box-shadow: 0 0 4px 1px rgba(var(--clr-true-black), 0.25); }
 
 
-.grid-dots{ background-image: radial-gradient(circle, rgba(var(--clr-blue), 0.3) 1px, transparent 1px); background-size: 50px 50px; }
-.grid-lines { background-image: linear-gradient( var(--light-grey) 1px, transparent 1px), linear-gradient(90deg, #e0e0e0 1px, transparent 1px); background-size: 50px 50px; }
+.grid-dots{ background-image: radial-gradient(circle, rgba(var(--clr-blue), 0.3) 1px, transparent 1px); background-size: 80px 80px; }
+.grid-lines { background-image: linear-gradient( var(--light-grey) 1px, transparent 1px), linear-gradient(90deg, var(--light-grey) 1px, transparent 1px); background-size: 80px 80px; }
 
-.whole-blue, .whole-blue *{ color: var(--clr-blue) !important; } */
-.whole-red, .whole-red *{ color: var(--clr-red) !important; }
+.whole-blue, .whole-blue *{ color: var(--blue) !important; }
+.whole-blue .btn-cmn::after{ background: url('../assets/goto-blue.svg')center no-repeat; background-size: 50% auto; box-shadow: 0px 0px 4x 1px rgba(var(--clr-light-grey), 0.25); transition: all 0.3s linear; }
+.whole-blue .btn-cmn:is(:hover, :focus)::after{ background: url('../assets/goto-blue.svg') center no-repeat, #e5e7eb;  background-size: 50% auto; transition: all 0.3s linear; box-shadow: 0 0 4px 1px rgba(var(--clr-true-black), 0.25); }
+.whole-red, .whole-red *{ color: var(--red) !important; }
+.whole-red .btn-cmn::after{ background: url('../assets/goto-red.svg')center no-repeat; background-size: 50% auto; box-shadow: 0px 0px 4px 1px rgba(var(--clr-light-grey), 0.25); transition: all 0.3s linear; }
+.whole-red .btn-cmn:is(:hover, :focus)::after{ background: url('../assets/goto-red.svg') center no-repeat, #e5e7eb;  background-size: 50% auto; transition: all 0.3s linear; box-shadow: 0 0 4px 1px rgba(var(--clr-true-black), 0.25); }
 
 
 .ft-gt-wha { font-family: 'GT Walsheim', sans-serif !important; }
 .ft-cir-std { font-family: 'Circular Std', sans-serif !important; }
+
+
+
+/* landing page */
+.divider{ margin-top: -35px; margin-bottom: -35px; z-index: 999; text-align: center; }

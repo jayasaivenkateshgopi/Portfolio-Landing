@@ -157,7 +157,7 @@
 [class*="ls-"] { letter-spacing: calc(var(--unit) * var(--ls, 0)) !important; }
 
 /* LETTER-SPACING TOKENS (values in px via --unit) */
-.ls-50  { --ls: 50; }
+.ls-70  { --ls: 70; }
 
 /* FONT WEIGHT */
 .fwt-100 { font-weight: 100; }
