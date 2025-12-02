@@ -2,8 +2,8 @@
       cursor: none;
     }
     .cursor-dot {
-      width: 8px;
-      height: 8px;
+      width: 15px;
+      height: 15px;
       background: #000;
       border-radius: 50%;
       position: fixed;
