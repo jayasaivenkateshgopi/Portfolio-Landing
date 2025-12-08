@@ -49,8 +49,8 @@ body,p{ font-size: 20px !important; line-height: 1.4; font-weight: 400; }
 
 h1, h2, h3, h4, h5, h6 { line-height: 0.9 !important; font-family: 'GT Walsheim', sans-serif; }
 
-.fclr-grdblue { background-clip: text; -webkit-background-clip: text !important; color: transparent; -webkit-text-fill-color: transparent; background: var(--ft-grd-blue); }
-.fclr-grdred { background-clip: text; -webkit-background-clip: text !important; color: transparent; -webkit-text-fill-color: transparent; background: var(--ft-grd-red); }
+.fclr-grdblue { -webkit-background-clip: text !important; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; background: var(--ft-grd-blue); }
+.fclr-grdred { -webkit-background-clip: text !important; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; background: var(--ft-grd-red); }
 
 h1, h2, h3, p, ul, ol { margin-bottom: 0; }
 
