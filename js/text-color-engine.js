@@ -11,7 +11,10 @@
 
       const colorName = parts[1];
       const rgb = rootStyles.getPropertyValue(`--clr-${colorName}`).trim();
-      if (!rgb) return;
+      if (!rgb) {
+        console.warn(`text-color-engine: no CSS variable --clr-${colorName} found for class "${cls}"`, el);
+        return;
+      }
 
       if (parts.length === 2) {
         // solid color (no opacity)
@@ -20,8 +23,12 @@
 
       if (parts.length === 3) {
         // tinted color
-        const opacity = parseInt(parts[2]) / 100;
-        el.style.color = `rgba(${rgb}, ${opacity})`;
+        const opacity = parseInt(parts[2], 10);
+        if (isNaN(opacity)) {
+          console.warn(`text-color-engine: invalid opacity in class "${cls}"`, el);
+          return;
+        }
+        el.style.color = `rgba(${rgb}, ${opacity / 100})`;
       }
     });
   });
