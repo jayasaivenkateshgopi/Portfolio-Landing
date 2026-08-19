@@ -1,27 +1,23 @@
-(function() {
+/* Custom cursor: a dot that tracks the pointer and an outline that eases
+   toward it, snapping onto hovered buttons. */
+(function (global) {
+    const isCommonJs = typeof module !== 'undefined' && module.exports;
+    const { onReady } = isCommonJs ? require('./utils') : global.PortfolioUtils;
+
+    const HOVER_TARGETS = 'button, .btn-cmn';
+    // Inline styles cleared when the outline detaches from a button.
+    const OUTLINE_OVERRIDES = ['width', 'height', 'borderRadius', 'borderWidth', 'borderColor', 'borderStyle'];
+
     function initCursorEngine() {
-        // Create cursor elements
-        const cursorDot = document.createElement('div');
-        cursorDot.className = 'cursor-dot';
-
-        const cursorOutline = document.createElement('div');
-        cursorOutline.className = 'cursor-outline';
-
-        const buttonBorder = document.createElement('div');
-        buttonBorder.className = 'button-border';
-
-        function appendCursorElements() {
-            document.body.appendChild(cursorDot);
-            document.body.appendChild(cursorOutline);
-            document.body.appendChild(buttonBorder);
+        function createCursorElement(className) {
+            const el = document.createElement('div');
+            el.className = className;
+            return el;
         }
 
-        // Append to body when DOM is ready
-        if (document.body) {
-            appendCursorElements();
-        } else {
-            document.addEventListener('DOMContentLoaded', appendCursorElements);
-        }
+        const cursorDot = createCursorElement('cursor-dot');
+        const cursorOutline = createCursorElement('cursor-outline');
+        const buttonBorder = createCursorElement('button-border');
 
         let mouseX = 0, mouseY = 0;
         let outlineX = 0, outlineY = 0;
@@ -29,12 +25,16 @@
         let isHoveringButton = false;
         let currentButton = null;
 
+        function moveTo(el, x, y) {
+            el.style.left = x + 'px';
+            el.style.top = y + 'px';
+        }
+
         document.addEventListener('mousemove', (e) => {
             mouseX = e.clientX;
             mouseY = e.clientY;
 
-            cursorDot.style.left = mouseX + 'px';
-            cursorDot.style.top = mouseY + 'px';
+            moveTo(cursorDot, mouseX, mouseY);
 
             if (!isHoveringButton) {
                 targetOutlineX = mouseX;
@@ -66,7 +66,6 @@
 
             requestAnimationFrame(animateOutline);
         }
-        animateOutline();
 
         // Store the initial cursor-outline border color from CSS
         let initialOutlineColor = null;
@@ -82,12 +81,7 @@
         function updateOutlineToButton(button) {
             const rect = button.getBoundingClientRect();
             const computedStyle = window.getComputedStyle(button);
-
-            // Get border properties
             const borderWidth = parseFloat(computedStyle.borderWidth) || 0;
-            const borderColor = computedStyle.borderColor;
-            const borderRadius = computedStyle.borderRadius;
-            const borderStyle = computedStyle.borderStyle;
 
             // Position outline to match button exactly
             targetOutlineX = rect.left + rect.width / 2;
@@ -96,13 +90,13 @@
             // Set outline dimensions to match button exactly (including border)
             cursorOutline.style.width = rect.width + 'px';
             cursorOutline.style.height = rect.height + 'px';
-            cursorOutline.style.borderRadius = borderRadius;
+            cursorOutline.style.borderRadius = computedStyle.borderRadius;
 
             if (borderWidth > 0) {
                 // Button has border - match it exactly
                 cursorOutline.style.borderWidth = borderWidth + 'px';
-                cursorOutline.style.borderColor = borderColor;
-                cursorOutline.style.borderStyle = borderStyle;
+                cursorOutline.style.borderColor = computedStyle.borderColor;
+                cursorOutline.style.borderStyle = computedStyle.borderStyle;
             } else {
                 // Button has no border - use default cursor-outline color
                 cursorOutline.style.borderWidth = '2px';
@@ -147,39 +141,27 @@
 
         // Initialize on existing elements
         function initCursor() {
-            document.querySelectorAll('button').forEach(setupButtonHover);
-            document.querySelectorAll('.btn-cmn').forEach(setupButtonHover);
-        }
-
-        // Run when DOM is ready
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initCursor);
-        } else {
-            initCursor();
+            document.querySelectorAll(HOVER_TARGETS).forEach(setupButtonHover);
         }
 
         // Observer for dynamically added elements
         const observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
                 mutation.addedNodes.forEach((node) => {
-                    if (node.nodeType === 1) { // Element node
-                        if (node.tagName === 'BUTTON') {
-                            setupButtonHover(node);
-                        } else if (node.classList && node.classList.contains('btn-cmn')) {
-                            setupButtonHover(node);
-                        }
-                        // Check children
-                        node.querySelectorAll && node.querySelectorAll('button').forEach(setupButtonHover);
-                        node.querySelectorAll && node.querySelectorAll('.btn-cmn').forEach(setupButtonHover);
-                    }
+                    if (node.nodeType !== Node.ELEMENT_NODE) return;
+                    if (node.matches(HOVER_TARGETS)) setupButtonHover(node);
+                    node.querySelectorAll(HOVER_TARGETS).forEach(setupButtonHover);
                 });
             });
         });
 
-        observer.observe(document.body || document.documentElement, {
-            childList: true,
-            subtree: true
+        onReady(() => {
+            [cursorDot, cursorOutline, buttonBorder].forEach(el => document.body.appendChild(el));
+            initCursor();
+            observer.observe(document.body, { childList: true, subtree: true });
         });
+
+        animateOutline();
 
         return {
             cursorDot,
@@ -194,9 +176,9 @@
         };
     }
 
-    if (typeof module !== 'undefined' && module.exports) {
+    if (isCommonJs) {
         module.exports = { initCursorEngine };
     } else {
         initCursorEngine();
     }
-})();
+})(typeof window !== 'undefined' ? window : globalThis);

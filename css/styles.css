@@ -49,29 +49,35 @@ body,p{ font-size: 20px !important; line-height: 1.4; font-weight: 400; }
 
 h1, h2, h3, h4, h5, h6 { line-height: 0.9 !important; font-family: 'GT Walsheim', sans-serif; }
 
-.fclr-grdblue { -webkit-background-clip: text !important; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; background: var(--ft-grd-blue); }
-.fclr-grdred { -webkit-background-clip: text !important; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; background: var(--ft-grd-red); }
+/* Gradient text: set --ft-grd, the shared rule clips it to the glyphs. */
+[class*="fclr-grd"] { -webkit-background-clip: text !important; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; background: var(--ft-grd); }
+.fclr-grdblue { --ft-grd: var(--ft-grd-blue); }
+.fclr-grdred { --ft-grd: var(--ft-grd-red); }
 
 h1, h2, h3, p, ul, ol { margin-bottom: 0; }
 
 .fl-ft-h1 { font-size: clamp(50px, 15vw, 250px); }
 
-.btn-cmn{ display: inline-block; padding: 20px 80px 18px 30px; border-radius: 50px; box-shadow: inset 0px 0px 8px 0px rgba(var(--clr-true-black), 0.25); position: relative; transition: all 0.3s linear; background: #fff;  }
+/* Buttons: --goto-icon is the arrow badge, themed per section below. */
+.btn-cmn{ --goto-icon: url('../assets/goto.png'); display: inline-block; padding: 20px 80px 18px 30px; border-radius: 50px; box-shadow: inset 0px 0px 8px 0px rgba(var(--clr-true-black), 0.25); position: relative; transition: all 0.3s linear; background: #fff;  }
 
-.btn-cmn::after{ content: ''; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); width: 50px; height: 50px; border-radius: 40px; }
+.btn-cmn::after{ content: ''; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); width: 50px; height: 50px; border-radius: 40px; background-size: 50% auto; transition: all 0.3s linear; }
 
-.btn-cmn:is(:hover, :focus)::after{ background: url('../assets/goto.png') center no-repeat, #e5e7eb;  background-size: 50% auto; transition: all 0.3s linear; box-shadow: 0 0 4px 1px rgba(var(--clr-true-black), 0.25); }
+:is(.whole-blue, .whole-red) .btn-cmn::after{ background: var(--goto-icon) center no-repeat; background-size: 50% auto; box-shadow: 0px 0px 4px 1px rgba(var(--clr-light-grey), 0.25); }
+
+.btn-cmn:is(:hover, :focus)::after{ background: var(--goto-icon) center no-repeat, var(--light-grey); background-size: 50% auto; box-shadow: 0 0 4px 1px rgba(var(--clr-true-black), 0.25); }
 
 
-.grid-dots{ background-image: radial-gradient(circle, rgba(var(--clr-blue), 0.3) 1px, transparent 1px); background-size: 80px 80px; }
-.grid-lines { background-image: linear-gradient( var(--light-grey) 1px, transparent 1px), linear-gradient(90deg, var(--light-grey) 1px, transparent 1px); background-size: 80px 80px; }
+.grid-dots, .grid-lines { background-size: 80px 80px; }
+.grid-dots{ background-image: radial-gradient(circle, rgba(var(--clr-blue), 0.3) 1px, transparent 1px); }
+.grid-lines { background-image: linear-gradient( var(--light-grey) 1px, transparent 1px), linear-gradient(90deg, var(--light-grey) 1px, transparent 1px); }
 
-.whole-blue, .whole-blue *{ color: var(--blue) !important; }
-.whole-blue .btn-cmn::after{ background: url('../assets/goto-blue.svg')center no-repeat; background-size: 50% auto; box-shadow: 0px 0px 4x 1px rgba(var(--clr-light-grey), 0.25); transition: all 0.3s linear; }
-.whole-blue .btn-cmn:is(:hover, :focus)::after{ background: url('../assets/goto-blue.svg') center no-repeat, #e5e7eb;  background-size: 50% auto; transition: all 0.3s linear; box-shadow: 0 0 4px 1px rgba(var(--clr-true-black), 0.25); }
-.whole-red, .whole-red *{ color: var(--red) !important; }
-.whole-red .btn-cmn::after{ background: url('../assets/goto-red.svg')center no-repeat; background-size: 50% auto; box-shadow: 0px 0px 4px 1px rgba(var(--clr-light-grey), 0.25); transition: all 0.3s linear; }
-.whole-red .btn-cmn:is(:hover, :focus)::after{ background: url('../assets/goto-red.svg') center no-repeat, #e5e7eb;  background-size: 50% auto; transition: all 0.3s linear; box-shadow: 0 0 4px 1px rgba(var(--clr-true-black), 0.25); }
+/* Section themes: --whole-clr paints every descendant. */
+:is(.whole-blue, .whole-red), :is(.whole-blue, .whole-red) *{ color: var(--whole-clr) !important; }
+.whole-blue{ --whole-clr: var(--blue); }
+.whole-blue .btn-cmn{ --goto-icon: url('../assets/goto-blue.svg'); }
+.whole-red{ --whole-clr: var(--red); }
+.whole-red .btn-cmn{ --goto-icon: url('../assets/goto-red.svg'); }
 
 
 .ft-gt-wha { font-family: 'GT Walsheim', sans-serif !important; }

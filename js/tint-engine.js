@@ -30,9 +30,9 @@
     });
   }
 
-  if (typeof module !== 'undefined' && module.exports) {
+  if (isCommonJs) {
     module.exports = { applyTints };
   } else {
     applyTints(document);
   }
-})();
+})(typeof window !== 'undefined' ? window : globalThis);

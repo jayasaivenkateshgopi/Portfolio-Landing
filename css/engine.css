@@ -51,8 +51,8 @@
 .h-full { height: 100%; }
 .w-auto { width: auto; }
 .h-auto { height: auto; }
-.w-max-content { width: max-content; }
-.h-max-content { height: max-content; }
+.w-max-content { width: max-content !important; }
+.h-max-content { height: max-content !important; }
 
 /* Viewport Width (100vw) */
 .w-vw-25 { width: 25vw; }

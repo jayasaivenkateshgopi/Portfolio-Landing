@@ -1,15 +1,7 @@
-(function() {
-  function applyTextColors(scope) {
-    const root = scope || document;
-    const rootStyles = getComputedStyle(document.documentElement);
-
-    root.querySelectorAll('*').forEach(el => {
-      el.classList.forEach(cls => {
-        if (!cls.startsWith("text-")) return;
-
-        const parts = cls.split("-");
-        // text-blue → 2 parts
-        // text-blue-20 → 3 parts
+/* Applies `text-<color>[-<opacity>]` classes as text colors. */
+(function (global) {
+  const isCommonJs = typeof module !== 'undefined' && module.exports;
+  const { applyColorClasses } = isCommonJs ? require('./utils') : global.PortfolioUtils;
 
         const colorName = parts[1];
         const rgb = rootStyles.getPropertyValue(`--clr-${colorName}`).trim();
@@ -36,9 +28,9 @@
     });
   }
 
-  if (typeof module !== 'undefined' && module.exports) {
+  if (isCommonJs) {
     module.exports = { applyTextColors };
   } else {
     applyTextColors(document);
   }
-})();
+})(typeof window !== 'undefined' ? window : globalThis);
