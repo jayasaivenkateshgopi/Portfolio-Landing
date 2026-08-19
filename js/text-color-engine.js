@@ -1,19 +1,18 @@
 /* Applies `text-<color>[-<opacity>]` classes as text colors. */
 (function (global) {
   const isCommonJs = typeof module !== 'undefined' && module.exports;
-  /* istanbul ignore next -- the browser branch is exercised by the page, not jest. */
-  const { applyColorClasses } = isCommonJs ? require('./utils') : global.PortfolioUtils;
+  const { onReady, applyColorClasses } = isCommonJs ? require('./utils') : global.PortfolioUtils;
 
   function applyTextColors(scope) {
     applyColorClasses('text', (el, color) => {
       el.style.color = color;
-    }, { scope, label: 'text-color-engine' });
+    }, { scope });
   }
 
-  /* istanbul ignore else -- the browser branch is exercised by the page, not jest. */
+  /* istanbul ignore else -- browser-only auto-invoke */
   if (isCommonJs) {
     module.exports = { applyTextColors };
   } else {
-    applyTextColors(document);
+    onReady(() => applyTextColors());
   }
 })(typeof window !== 'undefined' ? window : globalThis);

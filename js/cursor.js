@@ -128,7 +128,9 @@
             cursorDot.style.opacity = '1';
 
             // Reset outline to default state
-            OUTLINE_OVERRIDES.forEach(prop => { cursorOutline.style[prop] = ''; });
+            OUTLINE_OVERRIDES.forEach(prop => {
+                cursorOutline.style[prop] = '';
+            });
 
             targetOutlineX = mouseX;
             targetOutlineY = mouseY;
@@ -171,7 +173,7 @@
         };
     }
 
-    /* istanbul ignore else -- the browser branch is exercised by the page, not jest. */
+    /* istanbul ignore else -- browser-only auto-invoke */
     if (isCommonJs) {
         module.exports = { initCursorEngine };
     } else {

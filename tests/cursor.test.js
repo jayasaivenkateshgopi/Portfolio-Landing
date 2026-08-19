@@ -232,3 +232,36 @@ test('binds hover handlers to buttons nested in added subtrees', async () => {
 
   expect(engine.getState().currentButton).toBe(link);
 });
+
+test('resets hover state when the hovered button leaves the DOM', () => {
+  document.body.innerHTML = '<button id="cta">Go</button>';
+  const button = document.getElementById('cta');
+  stubRect(button, { left: 0, top: 0, width: 20, height: 20 });
+
+  const engine = initCursorEngine();
+  button.dispatchEvent(new MouseEvent('mouseenter'));
+  button.remove();
+  engine.animateOutline();
+
+  expect(engine.getState().isHoveringButton).toBe(false);
+  expect(engine.getState().currentButton).toBe(null);
+  expect(engine.cursorDot.style.opacity).toBe('1');
+  expect(engine.cursorOutline.classList.contains('hover-button')).toBe(false);
+});
+
+test('logs and keeps animating when a frame throws', () => {
+  document.body.innerHTML = '<button id="cta">Go</button>';
+  const button = document.getElementById('cta');
+  stubRect(button, { left: 0, top: 0, width: 20, height: 20 });
+  const error = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+  const engine = initCursorEngine();
+  button.dispatchEvent(new MouseEvent('mouseenter'));
+
+  const boom = new Error('boom');
+  button.getBoundingClientRect = () => { throw boom; };
+
+  expect(() => engine.animateOutline()).not.toThrow();
+  expect(error).toHaveBeenCalledWith('cursor: animation frame failed', boom);
+  expect(window.requestAnimationFrame).toHaveBeenCalled();
+});

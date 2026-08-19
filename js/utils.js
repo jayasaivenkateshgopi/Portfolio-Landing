@@ -65,7 +65,7 @@
 
   const utils = { onReady, resolveRgb, toCssColor, applyColorClasses };
 
-  /* istanbul ignore else -- the browser branch is exercised by the page, not jest. */
+  /* istanbul ignore else -- browser-only global export */
   if (typeof module !== 'undefined' && module.exports) {
     module.exports = utils;
   } else {

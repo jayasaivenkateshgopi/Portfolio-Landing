@@ -1,19 +1,18 @@
 /* Applies `bg-<color>-<opacity>` classes as tinted background colors. */
 (function (global) {
   const isCommonJs = typeof module !== 'undefined' && module.exports;
-  /* istanbul ignore next -- the browser branch is exercised by the page, not jest. */
-  const { applyColorClasses } = isCommonJs ? require('./utils') : global.PortfolioUtils;
+  const { onReady, applyColorClasses } = isCommonJs ? require('./utils') : global.PortfolioUtils;
 
   function applyTints(scope) {
     applyColorClasses('bg', (el, color) => {
       el.style.backgroundColor = color;
-    }, { scope, requireOpacity: true, label: 'tint-engine' });
+    }, { scope, requireOpacity: true });
   }
 
-  /* istanbul ignore else -- the browser branch is exercised by the page, not jest. */
+  /* istanbul ignore else -- browser-only auto-invoke */
   if (isCommonJs) {
     module.exports = { applyTints };
   } else {
-    applyTints(document);
+    onReady(() => applyTints());
   }
 })(typeof window !== 'undefined' ? window : globalThis);

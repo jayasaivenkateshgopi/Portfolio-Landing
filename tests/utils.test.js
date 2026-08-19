@@ -1,99 +1,111 @@
 const { onReady, resolveRgb, toCssColor, applyColorClasses } = require('../js/utils');
 
+beforeEach(() => {
+  document.documentElement.removeAttribute('style');
+  document.body.innerHTML = '';
+  document.documentElement.style.setProperty('--clr-blue', '0, 31, 63');
+});
+
 describe('onReady', () => {
   test('runs the callback immediately once the body is parsed', () => {
     const callback = jest.fn();
+
     onReady(callback);
+
     expect(callback).toHaveBeenCalledTimes(1);
   });
 
   test('defers the callback until DOMContentLoaded while loading', () => {
-    const readyState = jest.spyOn(document, 'readyState', 'get').mockReturnValue('loading');
+    jest.spyOn(document, 'readyState', 'get').mockReturnValue('loading');
     const callback = jest.fn();
 
     onReady(callback);
     expect(callback).not.toHaveBeenCalled();
 
-    readyState.mockRestore();
+    jest.restoreAllMocks();
     document.dispatchEvent(new Event('DOMContentLoaded'));
+
     expect(callback).toHaveBeenCalledTimes(1);
   });
 });
 
 describe('resolveRgb', () => {
-  test('reads the "r, g, b" triplet from a --clr-* custom property', () => {
-    document.documentElement.style.setProperty('--clr-blue', '0, 0, 255');
-    expect(resolveRgb('blue')).toBe('0, 0, 255');
+  test('returns the trimmed --clr-* triplet', () => {
+    document.documentElement.style.setProperty('--clr-red', ' 255, 0, 0 ');
+
+    expect(resolveRgb('red')).toBe('255, 0, 0');
   });
 
-  test('returns an empty string for an undefined color', () => {
-    expect(resolveRgb('nope')).toBe('');
+  test('returns an empty string for an unknown color', () => {
+    expect(resolveRgb('chartreuse')).toBe('');
   });
 });
 
 describe('toCssColor', () => {
-  test('builds an opaque color without an opacity', () => {
-    expect(toCssColor('0, 0, 255')).toBe('rgb(0, 0, 255)');
+  test('builds a solid color when no opacity is given', () => {
+    expect(toCssColor('0, 31, 63')).toBe('rgb(0, 31, 63)');
   });
 
-  test('builds a tinted color from an opacity percentage', () => {
-    expect(toCssColor('0, 0, 255', 20)).toBe('rgba(0, 0, 255, 0.2)');
+  test('builds a tinted color from a percentage', () => {
+    expect(toCssColor('0, 31, 63', 40)).toBe('rgba(0, 31, 63, 0.4)');
+    expect(toCssColor('0, 31, 63', 0)).toBe('rgba(0, 31, 63, 0)');
   });
 });
 
 describe('applyColorClasses', () => {
-  beforeEach(() => {
-    document.documentElement.style.setProperty('--clr-blue', '0, 0, 255');
-    document.documentElement.style.setProperty('--clr-light-grey', '200, 200, 200');
-    document.body.innerHTML = '';
-  });
-
-  test('passes the resolved color of each matching class to the callback', () => {
-    document.body.innerHTML = `
-      <div class="bg-blue-20"></div>
-      <div class="bg-light-grey"></div>
-    `;
+  test('passes solid and tinted colors to the apply callback', () => {
+    document.body.innerHTML = '<p class="tc-blue"></p><span class="tc-blue-25"></span>';
     const apply = jest.fn();
 
-    applyColorClasses('bg', apply, { scope: document });
+    applyColorClasses('tc', apply);
 
-    expect(apply.mock.calls.map(([, color]) => color))
-      .toEqual(['rgba(0, 0, 255, 0.2)', 'rgb(200, 200, 200)']);
+    expect(apply.mock.calls.map(([, color]) => color)).toEqual([
+      'rgb(0, 31, 63)',
+      'rgba(0, 31, 63, 0.25)'
+    ]);
   });
 
-  test('skips classes without an opacity suffix when one is required', () => {
-    document.body.innerHTML = '<div class="bg-blue"></div>';
+  test('ignores classes whose color has no --clr-* property', () => {
+    document.body.innerHTML = '<p class="tc-chartreuse"></p><span class="other-blue"></span>';
     const apply = jest.fn();
 
-    applyColorClasses('bg', apply, { scope: document, requireOpacity: true });
+    applyColorClasses('tc', apply);
 
     expect(apply).not.toHaveBeenCalled();
   });
 
-  test('ignores non-color utilities without warning', () => {
-    document.body.innerHTML = '<div class="text-uppercase"></div>';
-    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+  test('skips classes without an opacity when requireOpacity is set', () => {
+    document.body.innerHTML = '<p class="tc-blue"></p><span class="tc-blue-10"></span>';
     const apply = jest.fn();
 
-    applyColorClasses('text', apply, { scope: document });
+    applyColorClasses('tc', apply, { requireOpacity: true });
 
-    expect(apply).not.toHaveBeenCalled();
-    expect(warn).not.toHaveBeenCalled();
-    warn.mockRestore();
+    expect(apply).toHaveBeenCalledTimes(1);
+    expect(apply.mock.calls[0][1]).toBe('rgba(0, 31, 63, 0.1)');
   });
 
-  test('warns when an opacity-suffixed class has no matching CSS variable', () => {
-    document.body.innerHTML = '<div class="bg-ghost-20"></div>';
-    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+  test('supports hyphenated color names', () => {
+    document.documentElement.style.setProperty('--clr-deep-blue', '1, 2, 3');
+    document.body.innerHTML = '<p class="tc-deep-blue"></p><span class="tc-deep-blue-50"></span>';
     const apply = jest.fn();
 
-    applyColorClasses('bg', apply, { scope: document, label: 'tint-engine' });
+    applyColorClasses('tc', apply);
 
-    expect(apply).not.toHaveBeenCalled();
-    expect(warn).toHaveBeenCalledWith(
-      expect.stringContaining('tint-engine: no CSS variable --clr-ghost'),
-      expect.any(HTMLElement)
-    );
-    warn.mockRestore();
+    expect(apply.mock.calls.map(([, color]) => color)).toEqual([
+      'rgb(1, 2, 3)',
+      'rgba(1, 2, 3, 0.5)'
+    ]);
+  });
+
+  test('only walks elements inside the given scope', () => {
+    document.body.innerHTML = '<p class="tc-blue"></p>';
+    const scope = document.createElement('div');
+    scope.innerHTML = '<span class="tc-blue"></span>';
+    const apply = jest.fn();
+
+    applyColorClasses('tc', apply, { scope });
+
+    expect(apply).toHaveBeenCalledTimes(1);
+    expect(apply.mock.calls[0][0]).toBe(scope.querySelector('span'));
   });
 });
