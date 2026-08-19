@@ -1,182 +1,202 @@
 (function() {
-            // Create cursor elements
-            const cursorDot = document.createElement('div');
-            cursorDot.className = 'cursor-dot';
-            
-            const cursorOutline = document.createElement('div');
-            cursorOutline.className = 'cursor-outline';
-            
-            const buttonBorder = document.createElement('div');
-            buttonBorder.className = 'button-border';
-            
-            // Append to body when DOM is ready
-            if (document.body) {
-                document.body.appendChild(cursorDot);
-                document.body.appendChild(cursorOutline);
-                document.body.appendChild(buttonBorder);
-            } else {
-                document.addEventListener('DOMContentLoaded', () => {
-                    document.body.appendChild(cursorDot);
-                    document.body.appendChild(cursorOutline);
-                    document.body.appendChild(buttonBorder);
-                });
-            }
+    function initCursorEngine() {
+        // Create cursor elements
+        const cursorDot = document.createElement('div');
+        cursorDot.className = 'cursor-dot';
 
-            let mouseX = 0, mouseY = 0;
-            let outlineX = 0, outlineY = 0;
-            let targetOutlineX = 0, targetOutlineY = 0;
-            let isHoveringButton = false;
-            let currentButton = null;
+        const cursorOutline = document.createElement('div');
+        cursorOutline.className = 'cursor-outline';
 
-            document.addEventListener('mousemove', (e) => {
-                mouseX = e.clientX;
-                mouseY = e.clientY;
-                
-                cursorDot.style.left = mouseX + 'px';
-                cursorDot.style.top = mouseY + 'px';
-                
-                if (!isHoveringButton) {
-                    targetOutlineX = mouseX;
-                    targetOutlineY = mouseY;
-                }
-            });
+        const buttonBorder = document.createElement('div');
+        buttonBorder.className = 'button-border';
 
-            function animateOutline() {
-                try {
-                    // Smooth animation
-                    outlineX += (targetOutlineX - outlineX) * 0.25;
-                    outlineY += (targetOutlineY - outlineY) * 0.25;
+        function appendCursorElements() {
+            document.body.appendChild(cursorDot);
+            document.body.appendChild(cursorOutline);
+            document.body.appendChild(buttonBorder);
+        }
 
-                    cursorOutline.style.left = outlineX + 'px';
-                    cursorOutline.style.top = outlineY + 'px';
+        // Append to body when DOM is ready
+        if (document.body) {
+            appendCursorElements();
+        } else {
+            document.addEventListener('DOMContentLoaded', appendCursorElements);
+        }
 
-                    // Update button outline position if hovering
-                    if (isHoveringButton && currentButton) {
-                        if (currentButton.isConnected) {
-                            updateOutlineToButton(currentButton);
-                        } else {
-                            // Hovered button was removed from the DOM; reset hover state
-                            resetHoverState();
-                        }
-                    }
-                } catch (err) {
-                    console.error('cursor: animation frame failed', err);
-                }
+        let mouseX = 0, mouseY = 0;
+        let outlineX = 0, outlineY = 0;
+        let targetOutlineX = 0, targetOutlineY = 0;
+        let isHoveringButton = false;
+        let currentButton = null;
 
-                requestAnimationFrame(animateOutline);
-            }
-            animateOutline();
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
 
-            // Store the initial cursor-outline border color from CSS
-            let initialOutlineColor = null;
-            
-            function getInitialOutlineColor() {
-                if (!initialOutlineColor) {
-                    const outlineStyle = window.getComputedStyle(cursorOutline);
-                    initialOutlineColor = outlineStyle.borderColor || outlineStyle.borderTopColor || '#fff';
-                }
-                return initialOutlineColor;
-            }
+            cursorDot.style.left = mouseX + 'px';
+            cursorDot.style.top = mouseY + 'px';
 
-            function updateOutlineToButton(button) {
-                const rect = button.getBoundingClientRect();
-                const computedStyle = window.getComputedStyle(button);
-                
-                // Get border properties
-                const borderWidth = parseFloat(computedStyle.borderWidth) || 0;
-                const borderColor = computedStyle.borderColor;
-                const borderRadius = computedStyle.borderRadius;
-                const borderStyle = computedStyle.borderStyle;
-                
-                // Position outline to match button exactly
-                targetOutlineX = rect.left + rect.width / 2;
-                targetOutlineY = rect.top + rect.height / 2;
-                
-                // Set outline dimensions to match button exactly (including border)
-                cursorOutline.style.width = rect.width + 'px';
-                cursorOutline.style.height = rect.height + 'px';
-                cursorOutline.style.borderRadius = borderRadius;
-                
-                if (borderWidth > 0) {
-                    // Button has border - match it exactly
-                    cursorOutline.style.borderWidth = borderWidth + 'px';
-                    cursorOutline.style.borderColor = borderColor;
-                    cursorOutline.style.borderStyle = borderStyle;
-                } else {
-                    // Button has no border - use default cursor-outline color
-                    cursorOutline.style.borderWidth = '2px';
-                    cursorOutline.style.borderColor = getInitialOutlineColor();
-                    cursorOutline.style.borderStyle = 'solid';
-                }
-            }
-
-            // Setup button hover effects
-            function setupButtonHover(button) {
-                button.addEventListener('mouseenter', () => {
-                    isHoveringButton = true;
-                    currentButton = button;
-                    
-                    cursorOutline.classList.add('hover-button');
-                    cursorDot.style.opacity = '0';
-                    
-                    updateOutlineToButton(button);
-                });
-                
-                button.addEventListener('mouseleave', resetHoverState);
-            }
-
-            function resetHoverState() {
-                isHoveringButton = false;
-                currentButton = null;
-
-                cursorOutline.classList.remove('hover-button');
-                cursorDot.style.opacity = '1';
-
-                // Reset outline to default state
-                cursorOutline.style.width = '';
-                cursorOutline.style.height = '';
-                cursorOutline.style.borderRadius = '';
-                cursorOutline.style.borderWidth = '';
-                cursorOutline.style.borderColor = '';
-                cursorOutline.style.borderStyle = '';
-
+            if (!isHoveringButton) {
                 targetOutlineX = mouseX;
                 targetOutlineY = mouseY;
             }
+        });
 
-            // Initialize on existing elements
-            function initCursor() {
-                document.querySelectorAll('button').forEach(setupButtonHover);
-                document.querySelectorAll('.btn-cmn').forEach(setupButtonHover);
+        function animateOutline() {
+            try {
+                // Smooth animation
+                outlineX += (targetOutlineX - outlineX) * 0.25;
+                outlineY += (targetOutlineY - outlineY) * 0.25;
+
+                cursorOutline.style.left = outlineX + 'px';
+                cursorOutline.style.top = outlineY + 'px';
+
+                // Update button outline position if hovering
+                if (isHoveringButton && currentButton) {
+                    if (currentButton.isConnected) {
+                        updateOutlineToButton(currentButton);
+                    } else {
+                        // Hovered button was removed from the DOM; reset hover state
+                        resetHoverState();
+                    }
+                }
+            } catch (err) {
+                console.error('cursor: animation frame failed', err);
             }
 
-            // Run when DOM is ready
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', initCursor);
+            requestAnimationFrame(animateOutline);
+        }
+        animateOutline();
+
+        // Store the initial cursor-outline border color from CSS
+        let initialOutlineColor = null;
+
+        function getInitialOutlineColor() {
+            if (!initialOutlineColor) {
+                const outlineStyle = window.getComputedStyle(cursorOutline);
+                initialOutlineColor = outlineStyle.borderColor || outlineStyle.borderTopColor || '#fff';
+            }
+            return initialOutlineColor;
+        }
+
+        function updateOutlineToButton(button) {
+            const rect = button.getBoundingClientRect();
+            const computedStyle = window.getComputedStyle(button);
+
+            // Get border properties
+            const borderWidth = parseFloat(computedStyle.borderWidth) || 0;
+            const borderColor = computedStyle.borderColor;
+            const borderRadius = computedStyle.borderRadius;
+            const borderStyle = computedStyle.borderStyle;
+
+            // Position outline to match button exactly
+            targetOutlineX = rect.left + rect.width / 2;
+            targetOutlineY = rect.top + rect.height / 2;
+
+            // Set outline dimensions to match button exactly (including border)
+            cursorOutline.style.width = rect.width + 'px';
+            cursorOutline.style.height = rect.height + 'px';
+            cursorOutline.style.borderRadius = borderRadius;
+
+            if (borderWidth > 0) {
+                // Button has border - match it exactly
+                cursorOutline.style.borderWidth = borderWidth + 'px';
+                cursorOutline.style.borderColor = borderColor;
+                cursorOutline.style.borderStyle = borderStyle;
             } else {
-                initCursor();
+                // Button has no border - use default cursor-outline color
+                cursorOutline.style.borderWidth = '2px';
+                cursorOutline.style.borderColor = getInitialOutlineColor();
+                cursorOutline.style.borderStyle = 'solid';
             }
+        }
 
-            // Observer for dynamically added elements
-            const observer = new MutationObserver((mutations) => {
-                mutations.forEach((mutation) => {
-                    mutation.addedNodes.forEach((node) => {
-                        if (node.nodeType === 1) { // Element node
-                            if (node.tagName === 'BUTTON') {
-                                setupButtonHover(node);
-                            } else if (node.classList && node.classList.contains('btn-cmn')) {
-                                setupButtonHover(node);
-                            }
-                            // Check children
-                            node.querySelectorAll && node.querySelectorAll('button').forEach(setupButtonHover);
-                            node.querySelectorAll && node.querySelectorAll('.btn-cmn').forEach(setupButtonHover);
+        // Setup button hover effects
+        function setupButtonHover(button) {
+            button.addEventListener('mouseenter', () => {
+                isHoveringButton = true;
+                currentButton = button;
+
+                cursorOutline.classList.add('hover-button');
+                cursorDot.style.opacity = '0';
+
+                updateOutlineToButton(button);
+            });
+
+            button.addEventListener('mouseleave', resetHoverState);
+        }
+
+        function resetHoverState() {
+            isHoveringButton = false;
+            currentButton = null;
+
+            cursorOutline.classList.remove('hover-button');
+            cursorDot.style.opacity = '1';
+
+            // Reset outline to default state
+            cursorOutline.style.width = '';
+            cursorOutline.style.height = '';
+            cursorOutline.style.borderRadius = '';
+            cursorOutline.style.borderWidth = '';
+            cursorOutline.style.borderColor = '';
+            cursorOutline.style.borderStyle = '';
+
+            targetOutlineX = mouseX;
+            targetOutlineY = mouseY;
+        }
+
+        // Initialize on existing elements
+        function initCursor() {
+            document.querySelectorAll('button').forEach(setupButtonHover);
+            document.querySelectorAll('.btn-cmn').forEach(setupButtonHover);
+        }
+
+        // Run when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initCursor);
+        } else {
+            initCursor();
+        }
+
+        // Observer for dynamically added elements
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                mutation.addedNodes.forEach((node) => {
+                    if (node.nodeType === 1) { // Element node
+                        if (node.tagName === 'BUTTON') {
+                            setupButtonHover(node);
+                        } else if (node.classList && node.classList.contains('btn-cmn')) {
+                            setupButtonHover(node);
                         }
-                    });
+                        // Check children
+                        node.querySelectorAll && node.querySelectorAll('button').forEach(setupButtonHover);
+                        node.querySelectorAll && node.querySelectorAll('.btn-cmn').forEach(setupButtonHover);
+                    }
                 });
             });
+        });
 
-            observer.observe(document.body || document.documentElement, {
-                childList: true,
-                subtree: true
-            });
-        })();
+        observer.observe(document.body || document.documentElement, {
+            childList: true,
+            subtree: true
+        });
+
+        return {
+            cursorDot,
+            cursorOutline,
+            buttonBorder,
+            observer,
+            animateOutline,
+            updateOutlineToButton,
+            setupButtonHover,
+            initCursor,
+            getState: () => ({ mouseX, mouseY, outlineX, outlineY, isHoveringButton, currentButton })
+        };
+    }
+
+    if (typeof module !== 'undefined' && module.exports) {
+        module.exports = { initCursorEngine };
+    } else {
+        initCursorEngine();
+    }
+})();
