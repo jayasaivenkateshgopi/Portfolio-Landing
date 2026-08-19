@@ -2,6 +2,7 @@
    toward it, snapping onto hovered buttons. */
 (function (global) {
     const isCommonJs = typeof module !== 'undefined' && module.exports;
+    /* istanbul ignore next -- the browser branch is exercised by the page, not jest. */
     const { onReady } = isCommonJs ? require('./utils') : global.PortfolioUtils;
 
     const HOVER_TARGETS = 'button, .btn-cmn';
@@ -48,8 +49,7 @@
                 outlineX += (targetOutlineX - outlineX) * 0.25;
                 outlineY += (targetOutlineY - outlineY) * 0.25;
 
-                cursorOutline.style.left = outlineX + 'px';
-                cursorOutline.style.top = outlineY + 'px';
+                moveTo(cursorOutline, outlineX, outlineY);
 
                 // Update button outline position if hovering
                 if (isHoveringButton && currentButton) {
