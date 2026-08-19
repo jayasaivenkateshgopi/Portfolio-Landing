@@ -43,16 +43,25 @@
         });
 
         function animateOutline() {
-            // Smooth animation
-            outlineX += (targetOutlineX - outlineX) * 0.25;
-            outlineY += (targetOutlineY - outlineY) * 0.25;
+            try {
+                // Smooth animation
+                outlineX += (targetOutlineX - outlineX) * 0.25;
+                outlineY += (targetOutlineY - outlineY) * 0.25;
 
-            cursorOutline.style.left = outlineX + 'px';
-            cursorOutline.style.top = outlineY + 'px';
+                cursorOutline.style.left = outlineX + 'px';
+                cursorOutline.style.top = outlineY + 'px';
 
-            // Update button outline position if hovering
-            if (isHoveringButton && currentButton) {
-                updateOutlineToButton(currentButton);
+                // Update button outline position if hovering
+                if (isHoveringButton && currentButton) {
+                    if (currentButton.isConnected) {
+                        updateOutlineToButton(currentButton);
+                    } else {
+                        // Hovered button was removed from the DOM; reset hover state
+                        resetHoverState();
+                    }
+                }
+            } catch (err) {
+                console.error('cursor: animation frame failed', err);
             }
 
             requestAnimationFrame(animateOutline);
@@ -114,24 +123,26 @@
                 updateOutlineToButton(button);
             });
 
-            button.addEventListener('mouseleave', () => {
-                isHoveringButton = false;
-                currentButton = null;
+            button.addEventListener('mouseleave', resetHoverState);
+        }
 
-                cursorOutline.classList.remove('hover-button');
-                cursorDot.style.opacity = '1';
+        function resetHoverState() {
+            isHoveringButton = false;
+            currentButton = null;
 
-                // Reset outline to default state
-                cursorOutline.style.width = '';
-                cursorOutline.style.height = '';
-                cursorOutline.style.borderRadius = '';
-                cursorOutline.style.borderWidth = '';
-                cursorOutline.style.borderColor = '';
-                cursorOutline.style.borderStyle = '';
+            cursorOutline.classList.remove('hover-button');
+            cursorDot.style.opacity = '1';
 
-                targetOutlineX = mouseX;
-                targetOutlineY = mouseY;
-            });
+            // Reset outline to default state
+            cursorOutline.style.width = '';
+            cursorOutline.style.height = '';
+            cursorOutline.style.borderRadius = '';
+            cursorOutline.style.borderWidth = '';
+            cursorOutline.style.borderColor = '';
+            cursorOutline.style.borderStyle = '';
+
+            targetOutlineX = mouseX;
+            targetOutlineY = mouseY;
         }
 
         // Initialize on existing elements
