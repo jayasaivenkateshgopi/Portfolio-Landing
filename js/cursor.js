@@ -128,12 +128,9 @@
             cursorDot.style.opacity = '1';
 
             // Reset outline to default state
-            cursorOutline.style.width = '';
-            cursorOutline.style.height = '';
-            cursorOutline.style.borderRadius = '';
-            cursorOutline.style.borderWidth = '';
-            cursorOutline.style.borderColor = '';
-            cursorOutline.style.borderStyle = '';
+            OUTLINE_OVERRIDES.forEach(prop => {
+                cursorOutline.style[prop] = '';
+            });
 
             targetOutlineX = mouseX;
             targetOutlineY = mouseY;
@@ -176,6 +173,7 @@
         };
     }
 
+    /* istanbul ignore else -- browser-only auto-invoke */
     if (isCommonJs) {
         module.exports = { initCursorEngine };
     } else {
