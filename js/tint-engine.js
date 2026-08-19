@@ -1,35 +1,16 @@
-(function() {
+/* Applies `bg-<color>-<opacity>` classes as tinted background colors. */
+(function (global) {
+  const isCommonJs = typeof module !== 'undefined' && module.exports;
+  /* istanbul ignore next -- the browser branch is exercised by the page, not jest. */
+  const { applyColorClasses } = isCommonJs ? require('./utils') : global.PortfolioUtils;
+
   function applyTints(scope) {
-    const root = scope || document;
-    const rootStyles = getComputedStyle(document.documentElement);
-
-    root.querySelectorAll('*').forEach(el => {
-      el.classList.forEach(cls => {
-        if (!cls.startsWith("bg-")) return;
-
-        const parts = cls.split("-");
-        if (parts.length !== 3) return;
-
-        const colorName = parts[1];   // blue
-        const opacity = parseInt(parts[2], 10); // 10 → 10%
-
-        if (isNaN(opacity)) {
-          console.warn(`tint-engine: invalid opacity in class "${cls}"`, el);
-          return;
-        }
-
-        const rgb = rootStyles.getPropertyValue(`--clr-${colorName}`).trim();
-        if (!rgb) {
-          console.warn(`tint-engine: no CSS variable --clr-${colorName} found for class "${cls}"`, el);
-          return;
-        }
-
-        const alpha = opacity / 100;
-        el.style.backgroundColor = `rgba(${rgb}, ${alpha})`;
-      });
-    });
+    applyColorClasses('bg', (el, color) => {
+      el.style.backgroundColor = color;
+    }, { scope, requireOpacity: true, label: 'tint-engine' });
   }
 
+  /* istanbul ignore else -- the browser branch is exercised by the page, not jest. */
   if (isCommonJs) {
     module.exports = { applyTints };
   } else {

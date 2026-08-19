@@ -28,11 +28,14 @@
   /*
     Walks every class of every element in `scope` matching
     `<prefix>-<color>[-<opacity>]` and hands the resolved CSS color to
-    `apply(element, cssColor)`. Classes whose color has no `--clr-*` property
-    are ignored, as are classes without an opacity suffix when
-    `requireOpacity` is set.
+    `apply(element, cssColor)`.
+
+    Classes whose color has no `--clr-*` property are skipped, and are reported
+    through `console.warn` when they carry an opacity suffix (so they were
+    clearly meant as colors, unlike utilities such as `text-uppercase`).
+    Classes without an opacity suffix are skipped when `requireOpacity` is set.
   */
-  function applyColorClasses(prefix, apply, { scope, requireOpacity = false } = {}) {
+  function applyColorClasses(prefix, apply, { scope, requireOpacity = false, label = prefix } = {}) {
     const root = scope || document;
 
     root.querySelectorAll(`[class*="${prefix}-"]`).forEach(el => {
@@ -46,8 +49,14 @@
         if (requireOpacity && !hasOpacity) return;
 
         const opacityPercent = hasOpacity ? parseInt(parts.pop(), 10) : undefined;
-        const rgb = resolveRgb(parts.join('-'));
-        if (!rgb) return;
+        const colorName = parts.join('-');
+        const rgb = resolveRgb(colorName);
+        if (!rgb) {
+          if (hasOpacity) {
+            console.warn(`${label}: no CSS variable --clr-${colorName} found for class "${cls}"`, el);
+          }
+          return;
+        }
 
         apply(el, toCssColor(rgb, opacityPercent));
       });
@@ -56,6 +65,7 @@
 
   const utils = { onReady, resolveRgb, toCssColor, applyColorClasses };
 
+  /* istanbul ignore else -- the browser branch is exercised by the page, not jest. */
   if (typeof module !== 'undefined' && module.exports) {
     module.exports = utils;
   } else {

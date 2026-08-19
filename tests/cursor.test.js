@@ -173,6 +173,38 @@ test('binds hover handlers to .btn-cmn elements too', () => {
   expect(engine.getState().currentButton).toBe(link);
 });
 
+test('resets the hover state when the hovered button leaves the DOM', () => {
+  document.body.innerHTML = '<button id="cta">Go</button>';
+  const button = document.getElementById('cta');
+  stubRect(button, { left: 100, top: 100, width: 100, height: 100 });
+
+  const engine = initCursorEngine();
+  mouseMove(5, 5);
+  button.dispatchEvent(new MouseEvent('mouseenter'));
+  button.remove();
+  engine.animateOutline();
+
+  expect(engine.cursorOutline.classList.contains('hover-button')).toBe(false);
+  expect(engine.cursorDot.style.opacity).toBe('1');
+  expect(engine.getState()).toMatchObject({ isHoveringButton: false, currentButton: null });
+});
+
+test('keeps animating after a frame throws', () => {
+  document.body.innerHTML = '<button id="cta">Go</button>';
+  const button = document.getElementById('cta');
+  stubRect(button, { left: 0, top: 0, width: 20, height: 20 });
+  const error = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+  const engine = initCursorEngine();
+  button.dispatchEvent(new MouseEvent('mouseenter'));
+
+  button.getBoundingClientRect = () => { throw new Error('boom'); };
+  engine.animateOutline();
+
+  expect(error).toHaveBeenCalledWith('cursor: animation frame failed', expect.any(Error));
+  expect(window.requestAnimationFrame).toHaveBeenCalledTimes(2);
+});
+
 test('binds hover handlers to dynamically added buttons', async () => {
   const engine = initCursorEngine();
 
